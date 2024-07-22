@@ -1,40 +1,65 @@
+require('dotenv').config();
+const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
-const mysql = require('mysql2');
 
-// Crear la conexión a la base de datos
-const connection = mysql.createConnection({
+// Configuración de la conexión a la base de datos
+const dbConfig = {
   host: 'localhost',
   user: 'root',
-  password: '200113',
+  password: process.env.contraseña_acceso_bd,
   database: 'projectbreak3'
-});
-
-// Conectar a la base de datos
-connection.connect();
-
-// Función para hashear la contraseña y luego insertar el profesor
-const insertProfessor = (name, email, plainPassword) => {
-  const saltRounds = 10;
-  bcrypt.hash(plainPassword, saltRounds, (err, hashedPassword) => {
-    if (err) {
-      console.error('Error hasheando la contraseña:', err);
-      return;
-    }
-
-    const sql = 'INSERT INTO profesor (name, email, password) VALUES (?, ?, ?)';
-    connection.query(sql, [name, email, hashedPassword], (err, results) => {
-      if (err) {
-        console.error('Error insertando el profesor:', err);
-      } else {
-        console.log('Profesor insertado con ID:', results.insertId);
-      }
-    });
-  });
 };
 
-// Insertar profesores con contraseñas hasheadas
-insertProfessor('Carlos García', 'carlos.garcia@example.com', 'password1');
-insertProfessor('María López', 'maria.lopez@example.com', 'password2');
-insertProfessor('José Martínez', 'jose.martinez@example.com', 'password3');
-insertProfessor('Ana Sánchez', 'ana.sanchez@example.com', 'password4');
-insertProfessor('Luis Fernández', 'luis.fernandez@example.com', 'password5');
+// Profesores
+const profesores = [
+  { id: 16844, nombre: 'Juan Pérez', email: 'juan.perez@example.com', password: 'juanperez' },
+  { id: 17423, nombre: 'María Gómez', email: 'maria.gomez@example.com', password: 'mariagomez' },
+  { id: 18234, nombre: 'Luis Martínez', email: 'luis.martinez@example.com', password: 'luismartinez' }
+];
+
+// Asignaturas
+const asignaturas = [
+  { id: 1001, nombre: 'Matemáticas', codigo: 'MATH101' },
+  { id: 1002, nombre: 'Física', codigo: 'PHYS101' },
+  { id: 2001, nombre: 'Programación', codigo: 'CHEM101' }
+];
+
+// Relación profesor_asignatura
+const profesorAsignatura = [
+  { profesor_id: 16844, asignatura_id: 1001 },
+  { profesor_id: 16844, asignatura_id: 1002 },
+  { profesor_id: 17423, asignatura_id: 1001 },
+  { profesor_id: 17423, asignatura_id: 2001 },
+  { profesor_id: 18234, asignatura_id: 1002 },
+  { profesor_id: 18234, asignatura_id: 2001 }
+];
+
+(async function() {
+  console.log(process.env.contraseña_acceso_bd)
+  const connection = await mysql.createConnection(dbConfig);
+
+  // Insertar datos en profesores
+  for (const profesor of profesores) {
+    const hashedPassword = await bcrypt.hash(profesor.password, 12);
+    await connection.query(`
+      INSERT INTO profesores (id, nombre, email, contraseña) VALUES (?, ?, ?, ?)
+    `, [profesor.id, profesor.nombre, profesor.email, hashedPassword]);
+  }
+
+  // Insertar datos en asignaturas
+  for (const asignatura of asignaturas) {
+    await connection.query(`
+      INSERT INTO asignaturas (id, nombre, codigo) VALUES (?, ?, ?)
+    `, [asignatura.id, asignatura.nombre, asignatura.codigo]);
+  }
+
+  // Insertar datos en profesor_asignatura
+  for (const pa of profesorAsignatura) {
+    await connection.query(`
+      INSERT INTO profesor_asignatura (profesor_id, asignatura_id) VALUES (?, ?)
+    `, [pa.profesor_id, pa.asignatura_id]);
+  }
+
+  console.log('Datos insertados correctamente.');
+  await connection.end();
+})();
