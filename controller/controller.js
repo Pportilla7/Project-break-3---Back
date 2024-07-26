@@ -1,4 +1,34 @@
 const db = require('../conexion_bd.js');
+const { verifyPassword, generateToken } = require ('./login.js')
+
+async function login(req, res, next){
+    const {email, password}=req.body;
+
+    try{
+        if (!email || !password) {
+            return res.status(400).send('Introduzca email y contraseña');
+        }
+        const resultado = await db.query(
+            'SELECT * FROM profesores WHERE email = ?',
+            [email]
+        )
+
+        if (resultado.length === 0) {
+            return res.status(404).send('Profesor no encontrado');
+        }
+        const profesor= resultado[0];
+        console.log('esto es la profesor', profesor[0].contraseña);
+        const profesorVerificado = await verifyPassword(password, profesor[0].contraseña);
+
+        if(profesorVerificado){
+            const token = generateToken(profesor);
+            res.json({ token }); 
+        }
+    }
+    catch(error){
+        next(error);
+    }
+}
 
 async function readEvents(req, res) {
     try {
@@ -73,5 +103,6 @@ module.exports = {
     filterEvents,
     addEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent, 
+    login
 };
