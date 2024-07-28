@@ -2,8 +2,12 @@ const express = require('express');
 const app = express();
 require('dotenv').config();
 
+const cors = require('cors');
+
 const {router} = require('./routes/routes.js');
 const {errorHandler} = require('./middleware/errores.js')
+
+app.use(cors());
 
 app.use(express.json());
 
