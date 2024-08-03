@@ -9,7 +9,7 @@ const { readEvents,
     getDataUser, 
     getSubjectByProfesor, 
     getRooms, 
-    getProfAsigId, 
+    getIdByProfIdAsigId, 
     getSubjectAndProfesorById, 
     getProfesorById, 
     getAsignaturaById,
@@ -25,7 +25,7 @@ router.get('/getProfesorById', authenticateToken, getProfesorById);
 router.get('/getAsignaturaByProfesorId', authenticateToken, getAsignaturaByProfesorId);
 router.get('/getAsignaturaById', authenticateToken, getAsignaturaById);
 router.get('/filterEvents/:fecha', authenticateToken, filterEvents);
-router.get('/getProfAsigId', authenticateToken, getProfAsigId);
+router.get('/getProfAsigId', authenticateToken, getIdByProfIdAsigId);
 router.post('/addEvent', authenticateToken, addEvent);
 router.put('/actualizarEvent/:id', authenticateToken, updateEvent);
 router.delete('/deleteEvent/:id', authenticateToken, deleteEvent);

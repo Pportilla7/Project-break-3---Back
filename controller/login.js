@@ -16,16 +16,14 @@ const verifyPassword = async ( password, contraseña) => {
 };
 
 const generateToken = (profesor) => {
-  console.log(profesor[0]);
   try {
       const tokenData = {
-          id: profesor[0].id,
-          email: profesor[0].email
+          id: profesor.id,
+          email: profesor.email
       };
-      console.log(tokenData);
+      
       const token = jwt.sign(tokenData, secretKey, { expiresIn: '1h' });
-      console.log('este es el token', token);
-      console.log('este es el token decodificado', jwt.decode(token,{complete:true}));
+    
       return token;
   } catch (error) {
       console.error('Error generando el token JWT:', error);
